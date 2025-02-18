@@ -1,0 +1,46 @@
+import numpy as np
+import pandas as pd
+
+# Cargar los datos desde archivos CSV
+ventas = pd.read_csv('/workspace/ventas.csv')
+inventarios = pd.read_csv('/workspace/inventarios.csv')
+satisfaccion = pd.read_csv('/workspace/satisfaccion.csv')
+
+# Limpiar datos eliminando valores nulos
+ventas.dropna(inplace=True)
+inventarios.dropna(inplace=True)
+satisfaccion.dropna(inplace=True)
+
+# Calcular ventas totales por tienda
+total_ventas_tienda = ventas.groupby('Tienda')['Total_Ventas'].sum()
+
+# Calcular ingresos totales por tienda
+ingresos_totales_tienda = ventas.groupby('Tienda').apply(lambda x: (x['Cantidad'] * x['Precio_Unitario']).sum())
+
+# Estadísticas de ventas
+descripcion_ventas = ventas['Total_Ventas'].describe()
+mediana_ventas = np.median(ventas['Total_Ventas'])
+desviacion_estandar_ventas = np.std(ventas['Total_Ventas'])
+
+# Calcular rotación de inventarios
+inventarios['Rotacion'] = inventarios['Ventas'] / inventarios['Stock']
+
+# Filtrar tiendas con niveles críticos de inventario (<10%)
+tiendas_criticas_inventario = inventarios[inventarios['Ventas'] / inventarios['Stock'] < 0.1]
+
+# Filtrar tiendas con satisfacción menor al 60%
+tiendas_baja_satisfaccion = satisfaccion[satisfaccion['Satisfaccion'] < 60]
+
+# Simulación de proyecciones de ventas futuras
+np.random.seed(42)
+proyeccion_ventas = np.random.normal(mediana_ventas, desviacion_estandar_ventas, len(ventas))
+
+# Mostrar resultados
+print("Ventas totales por tienda:\n", total_ventas_tienda)
+print("\nIngresos totales por tienda:\n", ingresos_totales_tienda)
+print("\nDescripción de ventas:\n", descripcion_ventas)
+print(f"\nMediana de ventas: {mediana_ventas}")
+print(f"Desviación estándar de ventas: {desviacion_estandar_ventas}")
+print("\nTiendas con inventario crítico:\n", tiendas_criticas_inventario)
+print("\nTiendas con baja satisfacción:\n", tiendas_baja_satisfaccion)
+print("\nProyección de ventas futuras:\n", proyeccion_ventas)
